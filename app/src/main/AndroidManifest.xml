@@ -3,6 +3,7 @@
   package="edu.cnm.deepdive.attendance">
 
   <application
+    android:name=".AttendanceApplication"
     android:allowBackup="false"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"

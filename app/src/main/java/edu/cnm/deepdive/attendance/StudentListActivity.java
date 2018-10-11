@@ -2,6 +2,7 @@ package edu.cnm.deepdive.attendance;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -14,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import edu.cnm.deepdive.attendance.database.AbsenceDatabase;
+import edu.cnm.deepdive.attendance.database.Student;
+import edu.cnm.deepdive.attendance.database.StudentDao;
 import edu.cnm.deepdive.attendance.dummy.DummyContent;
 import java.util.List;
 
@@ -29,6 +32,7 @@ public class StudentListActivity extends AppCompatActivity {
    * Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
    */
   private boolean mTwoPane;
+  private List<Student> students;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +68,8 @@ public class StudentListActivity extends AppCompatActivity {
   @Override
   protected void onStart() {
     super.onStart();
-    AbsenceDatabase db = AbsenceDatabase.getInstance(this);
-    AbsenceDatabase.forgetInstance(this);
+    //db access or service access need to be done off UI thread
+    new StudentQuery().execute();//do a query here to show the latest data
   }
 
   private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -141,4 +145,25 @@ public class StudentListActivity extends AppCompatActivity {
       }
     }
   }
+
+  private class StudentQuery extends AsyncTask<Void, Void, List<Student>>{
+
+    public StudentQuery() {
+      super();
+    }
+
+    @Override
+    protected void onPostExecute(List<Student> students) {//this one happens in UI thread
+      StudentListActivity.this.students = students;
+    }
+
+    @Override
+    protected List<Student> doInBackground(Void... voids) {//this one happens in background thread
+      AbsenceDatabase db = AbsenceDatabase.getInstance(StudentListActivity.this);
+      StudentDao dao = db.getStudentDao();
+      List<Student> students = dao.select();
+      return dao.select();
+    }
+  }
+
 }
